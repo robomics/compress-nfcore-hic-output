@@ -1,6 +1,0 @@
-url	sha256	dest	action
-https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/p14/hg38.p14.chrom.sizes	33c11f8b76812ebb6504257f4dc51b4358230a6bb52b88048fa172aceb3d91fb	input/hg38/hg38.chrom.sizes	none
-https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/p14/hg38.p14.fa.gz	ae25ebe0b855e54e823f0b055c0b5e032e7a531dc0b47a440ddae7d2da26c20c	input/hg38/hg38.fa.gz	none
-ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/gencode.v43.annotation.gtf.gz	0235ad8420f6801a409661171396b564743aaf1ceb92c6ca4850becf60fe62c0	input/hg38/hg38_gencode_v43.gtf.gz	none
-https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/p14/hg38.p14.chromAlias.txt	0916204dc5efe4c03aee9949820235a0459cf6cbe15917e5f739b3abcf4cc87c	input/hg38/hg38_chrom_alias.txt	none
-
