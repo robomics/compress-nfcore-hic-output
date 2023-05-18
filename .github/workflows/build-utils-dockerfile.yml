@@ -20,7 +20,7 @@ on:
 jobs:
   build-utils-dockerfile:
     name: Build utils Dockerfile
-    uses: robomics/nextflow-workflow-template/.github/workflows/build-dockerfile.yml@main
+    uses: robomics/compress-nfcore-hic-output/.github/workflows/build-dockerfile.yml@main
     with:
       dockerfile-glob: "containers/utils*.Dockerfile"
 
