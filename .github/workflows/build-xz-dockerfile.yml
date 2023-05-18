@@ -1,28 +1,28 @@
 # Copyright (c) 2023 Roberto Rossini (roberros@uio.no)
 # SPDX-License-Identifier: MIT
 
-name: Build utils Dockerfile
+name: Build XZ Dockerfile
 
 on:
   push:
     branches: [ main ]
     paths:
-      - ".github/workflows/build-utils*dockerfile.yml"
+      - ".github/workflows/build-xz*dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
-      - "containers/utils*.Dockerfile"
+      - "containers/xz*.Dockerfile"
   pull_request:
     branches: [ main ]
     paths:
-      - ".github/workflows/build-utils*dockerfile.yml"
+      - ".github/workflows/build-xz*dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
-      - "containers/utils*.Dockerfile"
+      - "containers/xz*.Dockerfile"
 
 jobs:
   build-utils-dockerfile:
-    name: Build utils Dockerfile
+    name: Build XZ Dockerfile
     uses: robomics/compress-nfcore-hic-output/.github/workflows/build-dockerfile.yml@main
     with:
-      dockerfile-glob: "containers/utils*.Dockerfile"
+      dockerfile-glob: "containers/xz*.Dockerfile"
 
     permissions:
       contents: read
