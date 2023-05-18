@@ -29,7 +29,7 @@ The workflow can be run as follows:
 nextflow run --nfcore_hic_outdir='nfcore_hic_results/' \
              --fasta='hg38.fa' \
              --outdir='results/' \
-             https://github.com/robomics/call_tad_cliques \
+             https://github.com/robomics/compress-nfcore-hic-output \
              -r v0.0.1 \
              -with-singularity  # Replace this with -with-docker to use Docker instead
 ```
