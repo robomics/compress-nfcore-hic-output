@@ -11,7 +11,7 @@ set -x
 
 mkdir -p containers/cache
 
-read -r -d '' -a uris < <(find configs -type f -exec grep 'container[[:space:]]*=[[:space:]]' {} + |
+read -r -d '' -a uris < <(grep 'container[[:space:]]*=[[:space:]]' nextflow.config |
                           sed -E "s|.*container[[:space:]]+=[[:space:]]+[\"'](.*)[\"']|\1|" |
                           sort -u && printf '\0')
 
