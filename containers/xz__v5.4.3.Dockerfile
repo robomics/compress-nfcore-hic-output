@@ -4,7 +4,7 @@
 
 
 
-FROM curlimages/curl:8.1.0 AS downloader
+FROM curlimages/curl:8.1.1 AS downloader
 
 ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
