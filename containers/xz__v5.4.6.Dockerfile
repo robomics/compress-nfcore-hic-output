@@ -9,8 +9,8 @@ FROM curlimages/curl:8.5.0 AS downloader
 ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
 ARG XZ_SHA256
-ARG XZ_URL="https://tukaani.org/xz/xz-$XZ_VER.tar.gz"
-ARG XZ_CHECKSUM="${XZ_SHA256:-dd17b7881e049cb9c8ad899a7073cc3de854ff07cd2b634938b5150c52d8154a}  xz-${XZ_VER}.tar.gz"
+ARG XZ_URL="https://github.com/tukaani-project/xz/archive/refs/tags/v$XZ_VER.tar.gz"
+ARG XZ_CHECKSUM="${XZ_SHA256:-60831005fddb270824fa9f7cdd28a59da8757fe95466ed5b10bcfe23379f17d9}  v${XZ_VER}.tar.gz"
 
 RUN if [ -z "$CONTAINER_VERSION" ]; then echo "Missing CONTAINER_VERSION --build-arg" && exit 1; fi
 
@@ -24,17 +24,18 @@ RUN cd /tmp \
 FROM ubuntu:24.04 AS builder
 
 RUN apt-get update \
-&& apt-get install -y build-essential
+&& apt-get install -y autoconf autopoint build-essential doxygen libtool po4a
 
 ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
-ARG ARCHIVE="xz-${XZ_VER}.tar.gz"
+ARG ARCHIVE="v${XZ_VER}.tar.gz"
 
 COPY --from=downloader "/tmp/$ARCHIVE" /tmp/
 
 RUN tar -C /tmp -xf "/tmp/$ARCHIVE" \
-&& cd "/tmp/${ARCHIVE%.tar.gz}" \
-&& ./configure \
+&& cd /tmp/xz-* \
+&& ./autogen.sh \
+&& ./configure --prefix=/usr/local/ \
 && make -j $(nproc) \
 && make check -j $(nproc) \
 && make install
