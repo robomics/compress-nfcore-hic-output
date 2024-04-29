@@ -10,7 +10,7 @@ ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
 ARG XZ_SHA256
 ARG XZ_URL="https://tukaani.org/xz/xz-$XZ_VER.tar.gz"
-ARG XZ_CHECKSUM="${XZ_SHA256:-1c382e0bc2e4e0af58398a903dd62fff7e510171d2de47a1ebe06d1528e9b7e9}  xz-${XZ_VER}.tar.gz"
+ARG XZ_CHECKSUM="${XZ_SHA256:-dd17b7881e049cb9c8ad899a7073cc3de854ff07cd2b634938b5150c52d8154a}  xz-${XZ_VER}.tar.gz"
 
 RUN if [ -z "$CONTAINER_VERSION" ]; then echo "Missing CONTAINER_VERSION --build-arg" && exit 1; fi
 
@@ -21,7 +21,7 @@ RUN cd /tmp \
 && sha256sum -c checksum.sha256
 
 
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
 
 RUN apt-get update \
 && apt-get install -y build-essential
@@ -39,7 +39,7 @@ RUN tar -C /tmp -xf "/tmp/$ARCHIVE" \
 && make check -j $(nproc) \
 && make install
 
-FROM ubuntu:22.04 AS base
+FROM ubuntu:24.04 AS base
 
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 ENV PATH="/usr/local/bin:$PATH"
