@@ -18,10 +18,10 @@ def collect_files(prefix, sample_id, suffix, type = "file") {
 
 params.publish_dir = params.outdir
 
+include { ARCHIVE_FOLDER } from './subworkflows/archive_folder.nf'
 include { BAM2CRAM } from './subworkflows/compress_bwt2pairs.nf'
 include { COMPRESS_VALIDPAIRS } from './subworkflows/compress_validpairs.nf'
 include { COMPRESS_STATS } from './subworkflows/compress_stats.nf'
-include { COMPRESS_MULTIQC } from './subworkflows/compress_multiqc.nf'
 
 
 workflow {
@@ -50,8 +50,21 @@ workflow {
         params.xz_args
     )
 
-    COMPRESS_MULTIQC(
-        input_dir,
+    channel.fromPath(
+        "${input_dir}/*",
+        checkIfExists: true,
+        followLinks: true,
+        glob: true,
+        type: 'dir'
+    )
+    .filter {
+        def p = it.getFileName()
+        p != 'contact_maps' && p != 'hicpro'
+    }
+    .set { ch_folders }
+
+    ARCHIVE_FOLDER(
+        ch_folders,
         params.xz_args
     )
 }

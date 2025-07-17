@@ -74,14 +74,9 @@ process SAMTOOLS {
         trap "rm -rf '$TMPDIR'" EXIT
         ref="$TMPDIR/ref.fa"
 
-        mkdir -p "$TMPDIR"
-        if [[ '!{reference_fna}' == *.gz ]]; then
-            zcat '!{reference_fna}' > "$ref"
-        else
-            ln -s "$(readlink -f '!{reference_fna}')" "$ref"
-        fi
+        bsdcat '!{reference_fna}' > "$ref"
 
-        samtools cat -@!{task.cpus} *.bam                        |
+        samtools cat *.bam                                       |
         samtools sort -u                                         \\
                       -@!{task.cpus}                             \\
                       -m !{mem}M                                 \\
