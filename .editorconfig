@@ -17,6 +17,8 @@ indent_size = 4
 trim_trailing_whitespace = true
 charset = utf-8
 
+[*.tsv]
+indent_style = tab
 
 [*.{yaml,yml,r,sh}]
 indent_size = 2
