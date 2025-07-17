@@ -52,11 +52,10 @@ RUN tar -C /tmp -xf "/tmp/$ARCHIVE" \
 FROM alpine:3.22 AS base
 
 RUN apk add --no-cache \
+    bash \
     libintl \
     procps
 
-ENV LD_LIBRARY_PATH="/usr/local/lib"
-ENV PATH="/usr/local/bin:$PATH"
 CMD ["/usr/local/bin/xz"]
 WORKDIR /data
 

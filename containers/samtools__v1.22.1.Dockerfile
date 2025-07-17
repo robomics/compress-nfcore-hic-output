@@ -76,6 +76,7 @@ COPY --from=builder "/tmp/staging/share" "/usr/local/share"
 
 
 RUN apk add --no-cache \
+    bash \
     bzip2 \
     libarchive-tools \
     libdeflate \
