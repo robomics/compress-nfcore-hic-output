@@ -19,7 +19,7 @@ echo "uris: ${uris[*]}"
 
 for uri in "${uris[@]}"; do
     name="$(echo "$uri" | tr  -c '[:alnum:]_.\n' '-').img"
-    singularity pull --disable-cache -F --name "containers/cache/$name" "docker://$uri" &> /dev/null \
+    apptainer pull --disable-cache -F --name "containers/cache/$name" "docker://$uri" &> /dev/null \
     && echo "Done processing $uri..." &
 done
 
