@@ -41,10 +41,6 @@ workflow COMPRESS_STATS {
 }
 
 process TAR_XZ {
-    publishDir "${params.publish_dir}/stats",
-        enabled: !!params.publish_dir,
-        mode: params.publish_dir_mode
-
     label 'process_short'
     tag "$sample"
 
@@ -59,16 +55,17 @@ process TAR_XZ {
               val(condition),
               path("*.tar.xz"), emit: tar
 
-    shell:
+    script:
         outprefix="${sample}_stats"
-        '''
+        outname="${outprefix}.tar.xz"
+        """
         set -o pipefail
 
-        if [[ '!{stats_dir}' != '!{outprefix}' ]]; then
-            ln -s '!{stats_dir}/' '!{outprefix}'
+        if [[ '$stats_dir' != '$outprefix' ]]; then
+            ln -s '$stats_dir'/ '$outprefix'
         fi
 
-        tar -chf - '!{outprefix}' |
-            xz -T!{task.cpus} !{xz_args} > '!{outprefix}.tar.xz'
-        '''
+        tar -chf - '$outprefix' |
+            xz -T${task.cpus} $xz_args > '$outname'
+        """
 }

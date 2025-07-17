@@ -43,10 +43,6 @@ workflow BAM2CRAM {
 }
 
 process SAMTOOLS {
-    publishDir "${params.publish_dir}/alignments",
-        enabled: !!params.publish_dir,
-        mode: params.publish_dir_mode
-
     label 'process_long'
     tag "$sample"
 
@@ -63,30 +59,31 @@ process SAMTOOLS {
               path("*.cram"),
         emit: cram
 
-    shell:
+    script:
         mem=Math.floor(0.8 * task.memory.toMega() / task.cpus) as int
-        '''
+        outname="${sample}.bwt2pairs.cram"
+        """
         set -o pipefail
 
-        TMPDIR="$(mktemp -d --tmpdir="$PWD")"
+        TMPDIR="\$(mktemp -d --tmpdir="\$PWD")"
         export TMPDIR
 
-        trap "rm -rf '$TMPDIR'" EXIT
-        ref="$TMPDIR/ref.fa"
+        trap "rm -rf '\$TMPDIR'" EXIT
+        ref="\$TMPDIR/ref.fa"
 
-        bsdcat '!{reference_fna}' > "$ref"
+        bsdcat '$reference_fna' > "\$ref"
 
         samtools cat *.bam                                       |
         samtools sort -u                                         \\
                       -@!{task.cpus}                             \\
-                      -m !{mem}M                                 \\
-                      -T "$TMPDIR/samtools.sort"                 |
-        samtools view --reference "$ref"                         \\
+                      -m '$mem'M                                 \\
+                      -T "\$TMPDIR/samtools.sort"                |
+        samtools view --reference "\$ref"                        \\
                       --output-fmt cram                          \\
                       --output-fmt-option archive=1              \\
                       --output-fmt-option use_lzma=1             \\
-                      --output-fmt-option embed_ref=!{embed_fna} \\
-                      -@!{task.cpus}                             \\
-                      -o '!{sample}.bwt2pairs.cram'
-        '''
+                      --output-fmt-option embed_ref='$embed_fna' \\
+                      -@${task.cpus}                             \\
+                      -o '$outname'
+        """
 }

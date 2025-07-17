@@ -19,10 +19,6 @@ workflow ARCHIVE_FOLDER {
 }
 
 process TAR_XZ {
-    publishDir params.publish_dir,
-        enabled: !!params.publish_dir,
-        mode: params.publish_dir_mode
-
     tag "${name}"
 
     label 'process_short'
@@ -34,17 +30,17 @@ process TAR_XZ {
     output:
         path outname, emit: tar
 
-    shell:
+    script:
         name=dir.getFileName()
         outname="${name}.tar.xz"
-        '''
+        """
         set -o pipefail
 
-        if [[ '!{dir}' != '!{name}' ]]; then
-            ln -s '!{dir}/' '!{name}'
+        if [[ '$dir' != '$name' ]]; then
+            ln -s '$dir'/ '$name'
         fi
 
-        tar -chf - '!{name}/' |
-            xz -T!{task.cpus} !{xz_args} > '!{outname}'
-        '''
+        tar -chf - '$name'/ |
+            xz -T${task.cpus} $xz_args > '$outname'
+        """
 }

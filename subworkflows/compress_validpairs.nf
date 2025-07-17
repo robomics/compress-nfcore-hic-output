@@ -40,10 +40,6 @@ workflow COMPRESS_VALIDPAIRS {
 }
 
 process XZ {
-    publishDir "${params.publish_dir}/pairs",
-        enabled: !!params.publish_dir,
-        mode: params.publish_dir_mode
-
     label 'process_long'
     tag "$sample"
 
@@ -59,13 +55,19 @@ process XZ {
               path("*.xz"),
         emit: xz
 
-    shell:
-        out="${sample}.allValidPairs.xz"
+    script:
+        outname="${sample}.allValidPairs.xz"
         mem=task.memory.toGiga()
-        '''
-        xz !{xz_args} \\
-           -T!{task.cpus} \\
-           --memlimit-compress='!{mem}GB' \\
-           -fc *.allValidPairs > '!{out}'
-        '''
+        """
+        set -o pipefail
+
+        trap 'rm -rf *.tmp' EXIT
+        echo '$validpairs' > file_list.tmp
+
+        xargs -a file_list.tmp cat |
+        xz $xz_args \\
+           -T${task.cpus} \\
+           --memlimit-compress='$mem'GB \\
+           > '$outname'
+        """
 }
