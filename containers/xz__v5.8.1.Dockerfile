@@ -2,15 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-
-
-FROM curlimages/curl:8.10.1 AS downloader
+FROM curlimages/curl:latest AS downloader
 
 ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
 ARG XZ_SHA256
 ARG XZ_URL="https://github.com/tukaani-project/xz/archive/refs/tags/v$XZ_VER.tar.gz"
-ARG XZ_CHECKSUM="${XZ_SHA256:-60831005fddb270824fa9f7cdd28a59da8757fe95466ed5b10bcfe23379f17d9}  v${XZ_VER}.tar.gz"
+ARG XZ_CHECKSUM="${XZ_SHA256:-bdbc23fbf9098843357e71e49685724fda2c320c29cb1b25fd90505f14bb0b3d}  v${XZ_VER}.tar.gz"
 
 RUN if [ -z "$CONTAINER_VERSION" ]; then echo "Missing CONTAINER_VERSION --build-arg" && exit 1; fi
 
@@ -21,14 +19,24 @@ RUN cd /tmp \
 && sha256sum -c checksum.sha256
 
 
-FROM ubuntu:24.04 AS builder
-
-RUN apt-get update \
-&& apt-get install -y autoconf autopoint build-essential doxygen libtool po4a
+FROM alpine:3.22 AS builder
 
 ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
 ARG ARCHIVE="v${XZ_VER}.tar.gz"
+
+RUN apk add --no-cache \
+    autoconf \
+    automake \
+    clang \
+    doxygen \
+    gettext-dev \
+    libtool \
+    make \
+    po4a
+
+ARG CC=clang
+ARG CXX=clang++
 
 COPY --from=downloader "/tmp/$ARCHIVE" /tmp/
 
@@ -40,7 +48,12 @@ RUN tar -C /tmp -xf "/tmp/$ARCHIVE" \
 && make check -j $(nproc) \
 && make install
 
-FROM ubuntu:24.04 AS base
+
+FROM alpine:3.22 AS base
+
+RUN apk add --no-cache \
+    libintl \
+    procps
 
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 ENV PATH="/usr/local/bin:$PATH"
