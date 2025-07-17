@@ -5,24 +5,24 @@ name: Build samtools Dockerfile
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - ".github/workflows/build-samtools*dockerfile.yml"
+      - ".github/workflows/build-samtools-dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
-      - "containers/samtools*.Dockerfile"
+      - "containers/samtools__*.Dockerfile"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - ".github/workflows/build-samtools*dockerfile.yml"
+      - ".github/workflows/build-samtools-dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
-      - "containers/samtools*.Dockerfile"
+      - "containers/samtools__*.Dockerfile"
 
 jobs:
   build-samtools-dockerfile:
     name: Build samtools Dockerfile
     uses: robomics/compress-nfcore-hic-output/.github/workflows/build-dockerfile.yml@main
     with:
-      dockerfile-glob: "containers/samtools*.Dockerfile"
+      dockerfile-glob: "containers/samtools__*.Dockerfile"
 
     permissions:
       contents: read
