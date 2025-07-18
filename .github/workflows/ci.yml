@@ -1,0 +1,144 @@
+# Copyright (C) 2025 Roberto Rossini <roberros@uio.no>
+#
+# SPDX-License-Identifier: MIT
+
+name: CI
+
+on:
+  push:
+    branches: [main, devel]
+    paths:
+      - ".github/workflows/ci.yml"
+      - "main.nf"
+      - "nextflow.config"
+      - "conf/base.config"
+      - "conf/ci.config"
+      - "subworkflows/**"
+
+  pull_request:
+    paths:
+      - ".github/workflows/ci.yml"
+      - "main.nf"
+      - "nextflow.config"
+      - "conf/base.config"
+      - "conf/ci.config"
+      - "subworkflows/**"
+
+  release:
+    types: [published]
+
+# https://stackoverflow.com/a/72408109
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  TEST_DATASET_URL: "https://zenodo.org/records/16083811/files/nfcore-hic-v2.1.0-results.tar.zst?download=1"
+  TEST_DATASET_SHA256: "46ff9989e4ff91fe5e23a25e85b60272e54ffa3d67d6588ae7827d4ec80bbbe9"
+  REFERENCE_GENOME_URL: "https://zenodo.org/records/16083811/files/W303_SGD_2015_JRIU00000000.fsa.zst?download=1"
+  REFERENCE_GENOME_SHA256: "415ec9c1b4af185d34d0946530b5a762d78c896ad9686832e66cf9e2f2e3b5da"
+  NXF_ANSI_LOG: false
+  NXF_SYNTAX_PARSER: "v2"
+
+jobs:
+  preproc-test-dataset:
+    name: Preprocess test dataset
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.generate-cache-key.outputs.key }}
+
+    steps:
+      - name: Generate cache key
+        id: generate-cache-key
+        run: |
+          key="test-dataset-$TEST_DATASET_SHA256-$REFERENCE_GENOME_SHA256"
+          echo "key=$key" >> $GITHUB_OUTPUT
+
+      - name: Lookup cached test datasets
+        id: cache-dataset
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ steps.generate-cache-key.outputs.key }}
+          path: test/data/input/
+          lookup-only: true
+
+      - name: Download test dataset
+        if: steps.cache-dataset.outputs.cache-hit != 'true'
+        run: |
+          curl -L "$REFERENCE_GENOME_URL" -o reference.fa.zst
+          curl -L "$TEST_DATASET_URL" -o nfcore-hic-results.tar.zst
+
+      - name: Checksum test dataset
+        if: steps.cache-dataset.outputs.cache-hit != 'true'
+        run: |
+          echo "$REFERENCE_GENOME_SHA256  reference.fa.zst" > checksum.sha256
+          echo "$TEST_DATASET_SHA256  nfcore-hic-results.tar.zst" >> checksum.sha256
+          shasum -c checksum.sha256
+
+      - name: Stage files
+        if: steps.cache-dataset.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p test/data/input/
+          mv reference.fa.zst nfcore-hic-results.tar.zst test/data/input/
+
+      - name: Cache test datasets
+        if: steps.cache-dataset.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ steps.generate-cache-key.outputs.key }}
+          path: test/data/input/
+
+  test-workflow:
+    name: Test workflow
+    runs-on: ubuntu-latest
+    needs: [preproc-test-dataset]
+
+    permissions:
+      contents: read
+      packages: read
+
+    strategy:
+      matrix:
+        NXF_VER: ["25.04", "latest-stable"]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Cache test datasets
+        uses: actions/cache@v4
+        with:
+          key: ${{ needs.preproc-test-dataset.outputs.cache-key }}
+          path: test/data/input/
+          fail-on-cache-miss: true
+
+      - name: Extract test dataset
+        run: |
+          cd test/data/input
+          tar -xf nfcore-hic-results.tar.zst
+          rm nfcore-hic-results.tar.zst
+
+      - name: Install Nextflow
+        uses: nf-core/setup-nextflow@v2
+        with:
+          version: ${{ matrix.NXF_VER }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test workflow
+        run: |
+          nextflow run -c conf/ci.config \
+                       --nfcore_hic_outdir=test/data/input/results/ \
+                       --fasta test/data/input/reference.fa.zst \
+                       .
+
+          ls -lah results/
