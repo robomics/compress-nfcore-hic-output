@@ -142,3 +142,15 @@ jobs:
                        .
 
           ls -lah results/
+
+  ci-status-check:
+    name: Status Check (CI)
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs:
+      - test-workflow
+
+    steps:
+      - name: Collect job results
+        if: needs.test-workflow.result != 'success'
+        run: exit 1
