@@ -1,10 +1,53 @@
 <!--
-Copyright (C) 2023 Roberto Rossini <roberros@uio.no>
+Copyright (C) 2023 Roberto Rossini <user@uio.no>
 
 SPDX-License-Identifier: MIT
 -->
 
 # Nextflow workflow to compress nf-core/hic output
+
+---
+
+<!-- markdownlint-disable MD013 MD033 -->
+
+<table>
+    <tr>
+      <td>License</td>
+      <td>
+        <a href="https://github.com/robomics/compress-nfcore-hic-output/blob/main/LICENSE">
+          <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>Nextflow</td>
+      <td>
+        <a href="https://www.nextflow.io/">
+          <img src="https://img.shields.io/badge/version-%E2%89%A525.04-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io" alt="Nextflow version">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>DOI</td>
+      <td>
+        <a href="https://doi.org/10.5281/zenodo.16083810">
+          <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16083811.svg" alt="Zenodo DOI">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>CI</td>
+      <td>
+        <a href="https://github.com/robomics/compress-nfcore-hic-output/actions/workflows/ci.yml">
+          <img src="https://github.com/robomics/compress-nfcore-hic-output/actions/workflows/ci.yml/badge.svg" alt="CI Status">
+        </a>
+      </td>
+    </tr>
+</table>
+
+<!-- markdownlint-enable MD013 MD033 -->
+
+---
 
 This repository hosts a Nextflow workflow to compress the output produced by [nf-core/hic](https://nf-co.re/hic) v2+.
 
@@ -13,7 +56,7 @@ This repository hosts a Nextflow workflow to compress the output produced by [nf
 ### Software requirements
 
 - Nextflow (at least version: v25.04. Pipeline was developed using v25.04.6)
-- Docker or Singularity/Apptainer
+- Docker or Apptainer/Singularity
 
 ### Required input files
 
@@ -22,17 +65,35 @@ The workflow requires two inputs:
 1. The output folder produced by [nf-core/hic](https://nf-co.re/hic)
 2. The reference genome used for mapping by [nf-core/hic](https://nf-co.re/hic)
 
+You can download an example dataset to test the pipeline from [doi.org/10.5281/zenodo.16083810](https://doi.org/10.5281/zenodo.16083810):
+
+```console
+# Make sure you have curl and zstd available in your PATH
+user@dev:/tmp/$ curl -L 'https://zenodo.org/records/16083811/files/nfcore-hic-v2.1.0-results.tar.zst?download=1' | zstdcat | tar -xf -
+user@dev:/tmp/$ curl -L 'https://zenodo.org/records/16083811/files/W303_SGD_2015_JRIU00000000.fsa.zst?download=1' | zstdcat > reference.fa
+
+# Note that decompressing the reference genome is optional.
+# The pipeline can transparently handle most compression formats.
+
+user@dev:/tmp/$ ls -lah
+total 12M
+drwxr-xr-x.   3 user user   80 Jul 18 11:18 .
+drwxrwxrwt. 110 root root 3.0K Jul 18 11:17 ..
+drwxr-xr-x.  11 user user  220 Jul 17 16:42 results
+-rw-r--r--.   1 user user  12M Jul 18 11:18 reference.fa
+```
+
 ### Running the workflow
 
 The workflow can be run as follows:
 
 ```bash
 nextflow run --nfcore_hic_outdir='nfcore_hic_results/' \
-             --fasta='hg38.fa' \
+             --fasta='reference.fa' \
              -output-dir 'results/' \
              https://github.com/robomics/compress-nfcore-hic-output \
-             -r v0.0.1 \
-             -with-singularity  # Replace this with -with-docker to use Docker instead
+             -r v1.0.0 \
+             -with-apptainer  # Replace this with -with-docker to use Docker instead
 ```
 
 This will produce the following outputs:
@@ -59,7 +120,7 @@ Try to remove folder `~/.nextflow/assets/robomics/compress-nfcore-hic-output` be
 In order to pull docker images from `ghcr.io`, you first need to log in to `ghcr.io/robomics`.
 
 1. Follow GitHub instructions to generate a personal access token (PAT): [docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
-2. Run `docker login` or `singularity remote` to login into the remote.
+2. Run `docker login` or `apptainer remote` to login into the remote.
 
 Example:
 
@@ -67,8 +128,8 @@ Example:
 # Using Docker
 docker login -u your-github-username ghcr.io/robomics
 
-# Using singularity
-singularity remote login -u your-github-username docker://ghcr.io/robomics
+# Using apptainer
+apptainer remote login -u your-github-username docker://ghcr.io/robomics
 
 # You will now be prompted to enter your PAT
 ```
