@@ -30,8 +30,8 @@ SPDX-License-Identifier: MIT
     <tr>
       <td>DOI</td>
       <td>
-        <a href="https://doi.org/10.5281/zenodo.16083810">
-          <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16083811.svg" alt="Zenodo DOI">
+        <a href="https://doi.org/10.5281/zenodo.7949265">
+          <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16086377.svg" alt="Zenodo DOI">
         </a>
       </td>
     </tr>
