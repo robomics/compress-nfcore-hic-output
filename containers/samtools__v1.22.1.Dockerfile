@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM alpine:3.22 AS builder
+FROM alpine:3.23 AS builder
 
 ARG CONTAINER_VERSION
 ARG SAMTOOLS_VER=${CONTAINER_VERSION}
@@ -65,7 +65,7 @@ RUN cd "/tmp/samtools-$SAMTOOLS_VER" \
 && install -Dm0644 LICENSE /tmp/staging/share/doc/samtools/copyright
 
 
-FROM alpine:3.22 AS base
+FROM alpine:3.23 AS base
 ARG CONTAINER_VERSION
 ARG CONTAINER_TITLE
 

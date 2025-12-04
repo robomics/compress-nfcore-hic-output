@@ -19,7 +19,7 @@ RUN cd /tmp \
 && sha256sum -c checksum.sha256
 
 
-FROM alpine:3.22 AS builder
+FROM alpine:3.23 AS builder
 
 ARG CONTAINER_VERSION
 ARG XZ_VER=${CONTAINER_VERSION}
@@ -49,7 +49,7 @@ RUN tar -C /tmp -xf "/tmp/$ARCHIVE" \
 && make install
 
 
-FROM alpine:3.22 AS base
+FROM alpine:3.23 AS base
 
 RUN apk add --no-cache \
     bash \
